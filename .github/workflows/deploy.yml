@@ -1,9 +1,9 @@
+
 name: Deploy to Cloud Run
 
 on:
   push:
     branches:
-
       - main
 
 permissions:
@@ -28,11 +28,15 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
       - name: Build Image
         run: |
-          docker build -t us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/app-repo/app:${{ github.sha }} ./app
+          docker build \
+            -f app/Dockerfile \
+            -t us-central1-docker.pkg.dev/${{ secrets.PROJECT_ID }}/app-repo/app:${{ github.sha }} \
+            app
 
       - name: Push Image
         run: |
@@ -45,4 +49,3 @@ jobs:
             --region us-central1 \
             --platform managed \
             --allow-unauthenticated
-
